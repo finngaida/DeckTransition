@@ -13,7 +13,7 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = UIFont.systemFont(ofSize: 40, weight: UIFontWeightHeavy)
@@ -25,13 +25,27 @@ class ViewController: UIViewController {
         label.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 20).isActive = true
         label.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -20).isActive = true
         
-        let tap = UITapGestureRecognizer(target: self, action: #selector(self.viewWasTapped))
+        let tap = UITapGestureRecognizer(target: self, action: #selector(self.viewWasTappedx))
         view.addGestureRecognizer(tap)
+
     }
-    
+
+    func viewWasTappedx() {
+        self.performSegue(withIdentifier: "x", sender: nil)
+    }
+
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        guard let dismiss = segue as? DeckSegue else { return }
+        dismiss.dismissAnimation = {
+            self.view.backgroundColor = .red
+        }
+    }
+
     func viewWasTapped() {
         let modal = ModalViewController()
-        let transitionDelegate = DeckTransitioningDelegate()
+        let transitionDelegate = DeckTransitioningDelegate(dismissAnimation: {
+            self.view.backgroundColor = .red
+        })
         modal.transitioningDelegate = transitionDelegate
         modal.modalPresentationStyle = .custom
         present(modal, animated: true, completion: nil)
