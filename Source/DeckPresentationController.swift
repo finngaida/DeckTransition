@@ -235,12 +235,15 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
 		
 		if let snapshotView = presentingViewController.view.snapshotView(afterScreenUpdates: true) {
 			presentingViewSnapshotView.subviews.forEach { $0.removeFromSuperview() }
-			
-			snapshotView.translatesAutoresizingMaskIntoConstraints = false
-			presentingViewSnapshotView.addSubview(snapshotView)
-			
-			NSLayoutConstraint.activate([
-				snapshotView.topAnchor.constraint(equalTo: presentingViewSnapshotView.topAnchor),
+
+            snapshotView.layer.masksToBounds = true
+            snapshotView.layer.cornerRadius = Constants.cornerRadius
+
+            snapshotView.translatesAutoresizingMaskIntoConstraints = false
+            presentingViewSnapshotView.addSubview(snapshotView)
+
+            NSLayoutConstraint.activate([
+                snapshotView.topAnchor.constraint(equalTo: presentingViewSnapshotView.topAnchor, constant: Constants.isX ? 20 : 0),
 				snapshotView.leftAnchor.constraint(equalTo: presentingViewSnapshotView.leftAnchor),
 				snapshotView.rightAnchor.constraint(equalTo: presentingViewSnapshotView.rightAnchor),
 				snapshotView.bottomAnchor.constraint(equalTo: presentingViewSnapshotView.bottomAnchor)

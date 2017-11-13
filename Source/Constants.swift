@@ -29,5 +29,6 @@ struct Constants {
     /// came across online, 28 points is the distance between the top edge of
     /// the screen and the top edge of the modal view
     static let topOffsetForPresentedView: CGFloat = 28
-    
+
+    static let isX = UIScreen.main.bounds.height == 812
 }

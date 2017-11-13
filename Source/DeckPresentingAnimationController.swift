@@ -54,9 +54,12 @@ final class DeckPresentingAnimationController: NSObject, UIViewControllerAnimate
                 .concatenating(CGAffineTransform(translationX: presentingViewController.view.frame.width/2,
                                                  y: presentingViewController.view.frame.height/2))
         )
+
+        let offset: CGFloat = Constants.isX ? 20 : 0
+
         let finalFrameForRoundedViewForPresentingView = CGRect(
             x: finalFrameForPresentingView.origin.x,
-            y: finalFrameForPresentingView.origin.y,
+            y: finalFrameForPresentingView.origin.y + offset,
             width: finalFrameForPresentingView.width,
             height: Constants.cornerRadius)
         
@@ -79,7 +82,7 @@ final class DeckPresentingAnimationController: NSObject, UIViewControllerAnimate
             delay: 0,
             options: .curveEaseOut,
             animations: { [weak self] in
-                presentingViewController.view.transform = CGAffineTransform(scaleX: scale, y: scale)
+                presentingViewController.view.transform = CGAffineTransform(scaleX: scale, y: scale).concatenating(CGAffineTransform(translationX: 0, y: offset))
                 presentingViewController.view.alpha = Constants.alphaForPresentingView
                 
                 roundedViewForPresentingView.cornerRadius = Constants.cornerRadius
