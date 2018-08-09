@@ -339,13 +339,17 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
             }
 
         case .ended:
-            if let view = presentedView, gestureRecognizer.translation(in: view).y >= Constants.dismissDragThreshold || gestureRecognizer.velocity(in: view).y >= Constants.dismissDragVelocityThreshold {
+            if let view = presentedView {
+                let translation = gestureRecognizer.translation(in: view).y
+                let velocity = gestureRecognizer.velocity(in: view).y
+                if translation >= Constants.dismissDragThreshold || (velocity >= Constants.dismissDragVelocityThreshold && translation > 0) {
 
-                if presentingViewController.responds(to: NSSelectorFromString("setDragToDismissTransformAtTouchUp:")) {
-                    presentingViewController.perform(NSSelectorFromString("setDragToDismissTransformAtTouchUp:"), with: presentingViewSnapshotView!.transform.objcRepresentation)
+                    if presentingViewController.responds(to: NSSelectorFromString("setDragToDismissTransformAtTouchUp:")) {
+                        presentingViewController.perform(NSSelectorFromString("setDragToDismissTransformAtTouchUp:"), with: presentingViewSnapshotView!.transform.objcRepresentation)
+                    }
+
+                    presentedViewController.dismiss(animated: true, completion: nil)
                 }
-
-                presentedViewController.dismiss(animated: true, completion: nil)
             } else {
                 animateLin(duration: Constants.defaultAnimationDuration, delay: 0, completion: nil) {
                     self.presentedView?.transform = .identity
