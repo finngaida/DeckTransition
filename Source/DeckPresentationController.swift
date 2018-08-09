@@ -375,9 +375,9 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
     ///   the container view in the vertical direction
     private func updatePresentedViewForTranslation(inVerticalDirection translation: CGFloat) {
 
-        let elasticThreshold: CGFloat = 120
+        let elasticThreshold: CGFloat = UIScreen.main.bounds.height * 1/3
 
-        let translationFactor: CGFloat = 1/2
+        let translationFactor: CGFloat = 2/3
 
         /// Nothing happens if the pan gesture is performed from bottom
         /// to top i.e. if the translation is negative
@@ -393,7 +393,7 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
             }()
 
             presentedView?.transform = CGAffineTransform(translationX: 0, y: translationForModal)
-            let scale = 1 + (translationForModal) / 3000
+            let scale = 1 + (translationForModal) / 5000
             presentingViewSnapshotView?.transform = CGAffineTransform(scaleX: scale, y: scale)
         }
     }
