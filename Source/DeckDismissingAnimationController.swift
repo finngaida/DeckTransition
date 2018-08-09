@@ -15,15 +15,13 @@ final class DeckDismissingAnimationController: NSObject, UIViewControllerAnimate
     private let duration: TimeInterval?
     private let animation: (() -> ())?
     private let completion: ((Bool) -> ())?
-    //    let interactionController: UIViewControllerInteractiveTransitioning?
 
     // MARK:- Initializers
 
-    init(duration: TimeInterval?, animation: (() -> ())?, completion: ((Bool) -> ())?) { //}, interactionController: UIViewControllerInteractiveTransitioning?) {
+    init(duration: TimeInterval?, animation: (() -> ())?, completion: ((Bool) -> ())?) {
         self.duration = duration
         self.animation = animation
         self.completion = completion
-        //        self.interactionController = interactionController
     }
 
     // MARK:- UIViewControllerAnimatedTransitioning
@@ -34,15 +32,6 @@ final class DeckDismissingAnimationController: NSObject, UIViewControllerAnimate
 
         let containerView = transitionContext.containerView
         let scale: CGFloat = 1 - (Constants.topInsetForPresentingView * 2 / presentingViewController.view.frame.height)
-
-        let initialFrameForRoundedPresentingView = CGRect(
-            x: presentingViewController.view.frame.origin.x,
-            y: presentingViewController.view.frame.origin.y,
-            width: presentingViewController.view.frame.width,
-            height: Constants.cornerRadius)
-        let roundedViewForPresentingView = RoundedView(frame: initialFrameForRoundedPresentingView)
-        roundedViewForPresentingView.translatesAutoresizingMaskIntoConstraints = false
-        //        containerView.addSubview(roundedViewForPresentingView)
 
         presentingViewController.view.layer.masksToBounds = true
         presentingViewController.view.layer.cornerRadius = Constants.cornerRadius
@@ -56,33 +45,19 @@ final class DeckDismissingAnimationController: NSObject, UIViewControllerAnimate
             presentingViewController.view.transform = CGAffineTransform(scaleX: scale, y: scale).concatenating(CGAffineTransform(translationX: 0, y: 20))
         }
 
-        let finalFrameForPresentingView = transitionContext.finalFrame(for: presentingViewController)
-        let finalFrameForRoundedViewForPresentingView = CGRect(
-            x: finalFrameForPresentingView.origin.x,
-            y: finalFrameForPresentingView.origin.y,
-            width: finalFrameForPresentingView.width,
-            height: Constants.cornerRadius)
-
         let offScreenFrame = CGRect(x: 0, y: containerView.bounds.height, width: containerView.bounds.width, height: containerView.bounds.height)
 
-        UIView.animate(
-            withDuration: transitionDuration(using: transitionContext),
-            delay: 0,
-            options: .curveEaseOut,
-            animations: { [weak self] in
-                //                roundedViewForPresentingView.cornerRadius = 0
-                roundedViewForPresentingView.frame = finalFrameForRoundedViewForPresentingView
-                presentingViewController.view.alpha = 1
-                presentingViewController.view.transform = .identity
-                presentingViewController.view.layer.cornerRadius = 0
+        animateLin(duration: transitionDuration(using: transitionContext), delay: 0, completion: { [weak self] in
+            transitionContext.completeTransition(true)
+            self?.completion?(true)
+        }) { [weak self] in
+            presentingViewController.view.alpha = 1
+            presentingViewController.view.transform = .identity
+            presentingViewController.view.layer.cornerRadius = 0
 
-                presentedViewController.view.frame = offScreenFrame
-                self?.animation?()
-            }, completion: { [weak self] finished in
-                roundedViewForPresentingView.removeFromSuperview()
-                transitionContext.completeTransition(finished)
-                self?.completion?(finished)
-        })
+            presentedViewController.view.frame = offScreenFrame
+            self?.animation?()
+        }
     }
 
     func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {

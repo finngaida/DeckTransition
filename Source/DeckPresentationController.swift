@@ -51,10 +51,6 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
     var pan: UIPanGestureRecognizer?
 
     // MARK:- Private variables
-
-    private var roundedViewForPresentingView: RoundedView?
-    private var roundedViewForPresentedView: RoundedView?
-
     private var backgroundView: UIView?
     private var presentingViewSnapshotView: UIView?
     private var cachedContainerWidth: CGFloat = 0
@@ -109,12 +105,6 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
         }
 
         if completed {
-            roundedViewForPresentedView = RoundedView()
-            roundedViewForPresentedView!.translatesAutoresizingMaskIntoConstraints = false
-            containerView.addSubview(roundedViewForPresentedView!)
-
-            presentedViewController.view.addObserver(self, forKeyPath: "frame", options: [.initial], context: nil)
-            presentedViewController.view.addObserver(self, forKeyPath: "transform", options: [.initial], context: nil)
             presentedViewController.view.layer.mask = nil
             presentedViewController.view.frame = frameOfPresentedViewInContainerView
             presentAnimation?()
@@ -132,17 +122,6 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
                 ])
 
             updateSnapshotView()
-
-            roundedViewForPresentingView = RoundedView()
-            roundedViewForPresentingView!.translatesAutoresizingMaskIntoConstraints = false
-            containerView.insertSubview(roundedViewForPresentingView!, aboveSubview: presentingViewSnapshotView!)
-
-            NSLayoutConstraint.activate([
-                roundedViewForPresentingView!.topAnchor.constraint(equalTo: presentingViewSnapshotView!.topAnchor),
-                roundedViewForPresentingView!.leftAnchor.constraint(equalTo: presentingViewSnapshotView!.leftAnchor),
-                roundedViewForPresentingView!.rightAnchor.constraint(equalTo: presentingViewSnapshotView!.rightAnchor),
-                roundedViewForPresentingView!.heightAnchor.constraint(equalToConstant: Constants.cornerRadius)
-                ])
 
             backgroundView = UIView()
             backgroundView!.backgroundColor = .black
@@ -301,23 +280,6 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
         aspectRatioConstraint?.isActive = true
     }
 
-    // MARK:- Presented view KVO + Rounded view update methods
-
-    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-        if keyPath == "transform" || keyPath == "frame", let view = object as? UIView {
-            let offset = view.frame.origin.y
-            updateRoundedView(forOffset: offset)
-        }
-    }
-
-    private func updateRoundedView(forOffset offset: CGFloat) {
-        guard let roundedView = roundedViewForPresentedView else {
-            return
-        }
-
-        roundedView.frame = CGRect(x: 0, y: offset, width: containerView!.bounds.width, height: Constants.cornerRadius)
-    }
-
     // MARK:- Dismissal
 
     /// Method to prepare the view hirarchy for the dismissal animation
@@ -331,17 +293,12 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
         presentingViewController.view.transform = CGAffineTransform(scaleX: scale, y: scale)
         backgroundView?.removeFromSuperview()
         presentingViewSnapshotView?.removeFromSuperview()
-        roundedViewForPresentingView?.removeFromSuperview()
-        roundedViewForPresentedView?.removeFromSuperview()
     }
 
     /// Method to ensure the layout is as required at the end of the dismissal.
     /// This is required in case the modal is dismissed without animation.
     override func dismissalTransitionDidEnd(_ completed: Bool) {
         if completed {
-            presentedViewController.view.removeObserver(self, forKeyPath: "frame")
-            presentedViewController.view.removeObserver(self, forKeyPath: "transform")
-
             presentingViewController.view.frame = containerView!.frame
             presentingViewController.view.transform = .identity
             dismissAnimation?()
@@ -382,7 +339,7 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
             }
 
         case .ended:
-            if let view = presentedView, gestureRecognizer.translation(in: view).y >= 240 {
+            if let view = presentedView, gestureRecognizer.translation(in: view).y >= Constants.dismissDragThreshold || gestureRecognizer.velocity(in: view).y >= Constants.dismissDragVelocityThreshold {
 
                 if presentingViewController.responds(to: NSSelectorFromString("setDragToDismissTransformAtTouchUp:")) {
                     presentingViewController.perform(NSSelectorFromString("setDragToDismissTransformAtTouchUp:"), with: presentingViewSnapshotView!.transform.objcRepresentation)
@@ -390,10 +347,10 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
 
                 presentedViewController.dismiss(animated: true, completion: nil)
             } else {
-                UIView.animate(withDuration: 0.25, animations: {
+                animateLin(duration: Constants.defaultAnimationDuration, delay: 0, completion: nil) {
                     self.presentedView?.transform = .identity
                     self.presentingViewSnapshotView?.transform = .identity
-                })
+                }
 
                 NotificationCenter.default.post(name: NSNotification.Name("dismissingPanEnded"), object: nil)
             }

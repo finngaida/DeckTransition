@@ -31,4 +31,20 @@ struct Constants {
     static let topOffsetForPresentedView: CGFloat = 28
 
     static let isX = UIScreen.main.bounds.height == 812
+
+    static let dismissDragThreshold: CGFloat = 200
+
+    static let dismissDragVelocityThreshold: CGFloat = 2000
+}
+
+// MARK: helper func
+/// Mimic the Principle default animation curve
+func animateLin(duration: TimeInterval = 0.25, delay: TimeInterval = 0, completion: (()->())? = nil, animations: @escaping () -> Void) {
+    let animator = UIViewPropertyAnimator(duration: duration, controlPoint1: CGPoint(x: 0.25, y: 0.1), controlPoint2: CGPoint(x: 0.25, y: 1), animations: animations)
+    if let c = completion {
+        animator.addCompletion({ _ in
+            c()
+        })
+    }
+    animator.startAnimation(afterDelay: delay)
 }
