@@ -10,7 +10,7 @@ struct Constants {
     
     /// Default duration for present and dismiss animations when the user hasn't
     /// specified one
-    static let defaultAnimationDuration: TimeInterval = 0.3
+    static let defaultAnimationDuration: TimeInterval = 0.5
     
     /// The corner radius applied to the presenting and presented view
     /// controllers's views
@@ -40,7 +40,7 @@ struct Constants {
 // MARK: helper func
 /// Mimic the Principle default animation curve
 func animateLin(duration: TimeInterval = 0.25, delay: TimeInterval = 0, completion: (()->())? = nil, animations: @escaping () -> Void) {
-    let animator = UIViewPropertyAnimator(duration: duration, controlPoint1: CGPoint(x: 0.25, y: 0.1), controlPoint2: CGPoint(x: 0.25, y: 1), animations: animations)
+    let animator = UIViewPropertyAnimator(duration: duration, controlPoint1: CGPoint(x: 0.13, y: 0.74), controlPoint2: CGPoint(x: 0.22, y: 1), animations: animations)
     if let c = completion {
         animator.addCompletion({ _ in
             c()

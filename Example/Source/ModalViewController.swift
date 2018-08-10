@@ -35,6 +35,10 @@ class ModalViewController: UIViewController, UITextViewDelegate {
 		textView.bounces = false
 		
         textView.delegate = self
+
+        NotificationCenter.default.addObserver(forName: NSNotification.Name("dismissingPanBegan"), object: nil, queue: nil) { _ in
+            NotificationCenter.default.post(name: NSNotification.Name("bla"), object: self.textView.contentOffset.y)
+        }
     }
     
     override var preferredStatusBarStyle: UIStatusBarStyle {

@@ -314,6 +314,7 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
     }
 
     // MARK:- Gesture handling
+    var ignoreVelocity: Bool = true
 
     @objc private func handlePan(gestureRecognizer: UIPanGestureRecognizer) {
         guard gestureRecognizer.isEqual(pan) else {
@@ -325,6 +326,12 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
         case .began:
             gestureRecognizer.setTranslation(CGPoint(x: 0, y: 0), in: containerView)
             NotificationCenter.default.post(name: NSNotification.Name("dismissingPanBegan"), object: nil)
+
+            NotificationCenter.default.addObserver(forName: NSNotification.Name("pushScrollViewOffset"), object: nil, queue: nil) { [weak self] n in
+                if let float = n.object as? CGFloat {
+                    self?.ignoreVelocity = float <= 0
+                }
+            }
 
         case .changed:
             if let view = presentedView {
@@ -339,7 +346,11 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
             }
 
         case .ended:
-            if let view = presentedView, gestureRecognizer.translation(in: view).y >= Constants.dismissDragThreshold || (gestureRecognizer.velocity(in: view).y >= Constants.dismissDragVelocityThreshold && gestureRecognizer.translation(in: view).y > 0) {
+            if let view = presentedView,
+                (gestureRecognizer.translation(in: view).y >= Constants.dismissDragThreshold ||
+                    (gestureRecognizer.velocity(in: view).y >= Constants.dismissDragVelocityThreshold &&
+                        gestureRecognizer.translation(in: view).y > 0 &&
+                        !ignoreVelocity)) {
 
                     if presentingViewController.responds(to: NSSelectorFromString("setDragToDismissTransformAtTouchUp:")) {
                         presentingViewController.perform(NSSelectorFromString("setDragToDismissTransformAtTouchUp:"), with: presentingViewSnapshotView!.transform.objcRepresentation)
@@ -353,6 +364,7 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
                 }
 
                 NotificationCenter.default.post(name: NSNotification.Name("dismissingPanEnded"), object: nil)
+                NotificationCenter.default.removeObserver(self, name: NSNotification.Name("pushScrollViewOffset"), object: nil)
             }
 
         default: break
