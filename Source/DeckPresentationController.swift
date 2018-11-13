@@ -137,10 +137,12 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
 
             presentingViewController.view.transform = .identity
 
-            pan = UIPanGestureRecognizer(target: self, action: #selector(handlePan))
-            pan!.delegate = self
-            pan!.maximumNumberOfTouches = 1
-            presentedViewController.view.addGestureRecognizer(pan!)
+            if transitioningDelegate?.isDismissGestureEnabled() ?? true {
+                pan = UIPanGestureRecognizer(target: self, action: #selector(handlePan))
+                pan!.delegate = self
+                pan!.maximumNumberOfTouches = 1
+                presentedViewController.view.addGestureRecognizer(pan!)
+            }
         }
 
         presentCompletion?(completed)
@@ -325,12 +327,13 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
 
         case .began:
             gestureRecognizer.setTranslation(CGPoint(x: 0, y: 0), in: containerView)
+            NotificationCenter.default.post(name: NSNotification.Name("dismissingPanBegan"), object: nil)
+
             NotificationCenter.default.addObserver(forName: NSNotification.Name("pushScrollViewOffset"), object: nil, queue: nil) { [weak self] n in
                 if let float = n.object as? CGFloat {
-                    self?.ignoreVelocity = float > 0
+                    self?.ignoreVelocity = float <= 0
                 }
             }
-            NotificationCenter.default.post(name: NSNotification.Name("dismissingPanBegan"), object: nil)
 
         case .changed:
             if let view = presentedView {

@@ -30,7 +30,7 @@ struct Constants {
     /// the screen and the top edge of the modal view
     static let topOffsetForPresentedView: CGFloat = 28
 
-    static let isX = UIScreen.main.bounds.height == 812
+    static let isX = UIScreen.main.bounds.height == 812 || UIScreen.main.bounds.height == 896
 
     static let dismissDragThreshold: CGFloat = 200
 
