@@ -34,7 +34,7 @@ final class DeckPresentingAnimationController: NSObject, UIViewControllerAnimate
         presentingViewController.view.layer.masksToBounds = true
         
         let scale: CGFloat = 1 - (Constants.topInsetForPresentingView * 2 / presentingViewController.view.frame.height)
-        let offset: CGFloat = Constants.isX ? 20 : 0
+        let offset: CGFloat = Platform.isEdgeless ? 20 : 0
         
         containerView.addSubview(presentedViewController.view)
         presentedViewController.view.frame = CGRect(x: 0, y: containerView.bounds.height, width: containerView.bounds.width, height: containerView.bounds.height)

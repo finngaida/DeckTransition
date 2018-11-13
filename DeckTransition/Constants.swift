@@ -30,21 +30,7 @@ struct Constants {
     /// the screen and the top edge of the modal view
     static let topOffsetForPresentedView: CGFloat = 28
 
-    static let isX = UIScreen.main.bounds.height == 812 || UIScreen.main.bounds.height == 896
-
     static let dismissDragThreshold: CGFloat = 200
 
     static let dismissDragVelocityThreshold: CGFloat = 2000
-}
-
-// MARK: helper func
-/// Mimic the Principle default animation curve
-func animateLin(duration: TimeInterval = 0.25, delay: TimeInterval = 0, completion: (()->())? = nil, animations: @escaping () -> Void) {
-    let animator = UIViewPropertyAnimator(duration: duration, controlPoint1: CGPoint(x: 0.13, y: 0.74), controlPoint2: CGPoint(x: 0.22, y: 1), animations: animations)
-    if let c = completion {
-        animator.addCompletion({ _ in
-            c()
-        })
-    }
-    animator.startAnimation(afterDelay: delay)
 }

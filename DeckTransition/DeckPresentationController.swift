@@ -14,35 +14,6 @@ protocol DeckPresentationControllerDelegate {
     func isDismissGestureEnabled() -> Bool
 }
 
-extension CGAffineTransform {
-    typealias CGAffineTransformObjc = [String: CGFloat]
-
-    var objcRepresentation: CGAffineTransformObjc {
-        return [
-            "a": a,
-            "b": b,
-            "c": c,
-            "d": d,
-            "tx": tx,
-            "ty": ty,
-        ]
-    }
-
-    init?(objcRepresentation: CGAffineTransformObjc) {
-        guard
-            let a = objcRepresentation["a"],
-            let b = objcRepresentation["b"],
-            let c = objcRepresentation["c"],
-            let d = objcRepresentation["d"],
-            let tx = objcRepresentation["tx"],
-            let ty = objcRepresentation["ty"]
-            else { return nil }
-
-        self.init(a: a, b: b, c: c, d: d, tx: tx, ty: ty)
-    }
-
-}
-
 final class DeckPresentationController: UIPresentationController, UIGestureRecognizerDelegate {
 
     // MARK:- Internal variables
@@ -70,7 +41,7 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
         self.dismissAnimation = dismissAnimation
         self.dismissCompletion = dismissCompletion
 
-        NotificationCenter.default.addObserver(self, selector: #selector(updateForStatusBar), name: .UIApplicationDidChangeStatusBarFrame, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(updateForStatusBar), name: UIApplication.didChangeStatusBarFrameNotification, object: nil)
     }
 
     override var frameOfPresentedViewInContainerView: CGRect {
@@ -253,7 +224,7 @@ final class DeckPresentationController: UIPresentationController, UIGestureRecog
             presentingViewSnapshotView.addSubview(snapshotView)
 
             NSLayoutConstraint.activate([
-                snapshotView.topAnchor.constraint(equalTo: presentingViewSnapshotView.topAnchor, constant: Constants.isX ? 20 : 0),
+                snapshotView.topAnchor.constraint(equalTo: presentingViewSnapshotView.topAnchor, constant: Platform.isEdgeless ? 20 : 0),
                 snapshotView.leftAnchor.constraint(equalTo: presentingViewSnapshotView.leftAnchor),
                 snapshotView.rightAnchor.constraint(equalTo: presentingViewSnapshotView.rightAnchor),
                 snapshotView.bottomAnchor.constraint(equalTo: presentingViewSnapshotView.bottomAnchor)
